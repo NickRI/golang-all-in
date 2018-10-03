@@ -1,6 +1,6 @@
 FROM golang:alpine
 
-RUN apk add --no-cache curl git mercurial openssh
+RUN apk add --no-cache curl git mercurial openssh make
 
 RUN mkdir /root/.ssh
 COPY ./build/id_rsa /root/.ssh/id_rsa
