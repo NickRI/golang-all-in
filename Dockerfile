@@ -3,8 +3,8 @@ FROM golang:alpine
 RUN apk add --no-cache curl git mercurial openssh make
 
 RUN mkdir /root/.ssh
-COPY ./build/id_rsa /root/.ssh/id_rsa
-COPY ./build/known_hosts /root/.ssh/known_hosts
+COPY ./build/id_rsa /root/.ssh/
+COPY ./build/known_hosts /root/.ssh/
 RUN chmod 400 /root/.ssh/id_rsa
 
 ### INSTALL DEP ###
