@@ -1,6 +1,4 @@
-FROM golang:alpine
-
-RUN apk add --no-cache curl git mercurial openssh make gcc g++
+FROM golang
 
 RUN mkdir /root/.ssh
 COPY ./build/id_rsa /root/.ssh/
