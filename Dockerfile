@@ -10,3 +10,6 @@ RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 ### INSTALL GLIDE ###
 RUN curl https://glide.sh/get | sh
+
+### INSTALL GOOSE ###
+RUN go get github.com/steinbacher/goose/cmd/goose
