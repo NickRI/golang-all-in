@@ -1,7 +1,9 @@
 FROM golang
 
+ARG ID_RSA
+
 RUN mkdir /root/.ssh
-COPY ./build/id_rsa /root/.ssh/
+RUN echo ${ID_RSA} | sed -E -e 's/\\n+/\n/g' > /root/.ssh/id_rsa
 COPY ./build/known_hosts /root/.ssh/
 RUN chmod 400 /root/.ssh/id_rsa
 
