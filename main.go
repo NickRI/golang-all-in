@@ -3,9 +3,10 @@ package main
 import (
 	"bytes"
 	"flag"
-	"io"
 	"log"
 	"os"
+	"os/exec"
+	"strings"
 
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -19,7 +20,7 @@ func main() {
 	namespace := flag.String("namespace", "cattle-pipeline", "Set right namespace in cluster")
 	secretKey := flag.String("secretKey", "jenkins", "Set right secret key in cluster")
 	secretValue := flag.String("secretValue", "jenkins-id-rsa", "Set right secret value in cluster")
-	rsaKeyPath := flag.String("rsaKeyPath", "./build/id_rsa", "Set right secret value in cluster")
+	imageName := flag.String("imageName", "registry.strsqr.cloud/golang-all-in:latest", "Set final image name")
 	flag.Parse()
 
 	config, err := clientcmd.BuildConfigFromFlags("", *configFile)
@@ -38,16 +39,25 @@ func main() {
 	}
 
 	idRsaBody := bytes.NewBuffer(secret.Data[*secretValue])
+	log.Println("id_rsa file gathered")
 
-	rsaFile, err := os.Create(*rsaKeyPath)
+	dockerPath, err := exec.LookPath("docker")
 	if err != nil {
-		log.Panicf("Can't create id_rsa error: %+v", err)
-	}
-	defer rsaFile.Close()
-
-	if _, err = io.Copy(rsaFile, idRsaBody); err != nil {
-		log.Panicf("Can't write to file error: %+v", err)
+		log.Fatal("Docker is not installed on your computer")
 	}
 
-	log.Println("id_rsa file created")
+	idRSAPrepared := strings.NewReplacer("\n", "\\n").Replace(idRsaBody.String())
+
+	cmd := exec.Command(dockerPath, "build", ".", "--build-arg", "ID_RSA="+idRSAPrepared, "-t", *imageName)
+	cmd.Env = os.Environ()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Start(); err != nil {
+		log.Fatalf("Start command error: %v", err)
+	}
+
+	if err := cmd.Wait(); err != nil {
+		log.Fatalf("Wait command error: %v", err)
+	}
 }
