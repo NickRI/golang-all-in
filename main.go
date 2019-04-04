@@ -39,7 +39,10 @@ func main() {
 	}
 
 	idRsaBody := bytes.NewBuffer(secret.Data[*secretValue])
-	log.Println("id_rsa file gathered")
+	if idRsaBody.Len() == 0 {
+		log.Panicf("Secret key of %s -> %s[%s] is empty", *namespace, *secretKey, *secretValue)
+	}
+	log.Println("id_rsa file gathered", idRsaBody.Len(), "bytes")
 
 	dockerPath, err := exec.LookPath("docker")
 	if err != nil {
